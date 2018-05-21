@@ -24,7 +24,10 @@ void UPositionReport::BeginPlay()
 	// ...
 	FString OwnerName = GetOwner()->GetName();
 	uint32 OwnerID = GetOwner()->GetUniqueID();
-	UE_LOG(LogTemp, Log, TEXT("UPositionReport.BeginPlay on %s (%d)"), *OwnerName, OwnerID);
+	FString OwnerLocation = GetOwner()->GetActorLocation().ToString();
+	FString OwnerTransform = GetOwner()->GetActorTransform().ToString();
+	FString test("KashMoney");
+	UE_LOG(LogTemp, Log, TEXT("%s (%d) is at %s with transform %s"), *OwnerName, OwnerID, *OwnerLocation, *OwnerTransform);
 
 }
 
