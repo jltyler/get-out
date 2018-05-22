@@ -38,4 +38,5 @@ private:
 	UPROPERTY(EditAnywhere)
 		float OpenTime;
 	AActor * TriggerActor;
+	AActor * Owner;
 };
