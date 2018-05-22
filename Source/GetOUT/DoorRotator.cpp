@@ -19,13 +19,11 @@ UDoorRotator::UDoorRotator()
 void UDoorRotator::BeginPlay()
 {
 	Super::BeginPlay();
+}
 
-	auto OwningActor = GetOwner();
-	auto ActorRotation = OwningActor->GetActorRotation();
-	UE_LOG(LogTemp, Warning, TEXT("%s has rotation of %s"), *OwningActor->GetName(), *ActorRotation.ToString())
-	ActorRotation = ActorRotation.Add(-30.0f, -40.0f, 0.0f);
-	UE_LOG(LogTemp, Warning, TEXT("%s has rotation of %s"), *OwningActor->GetName(), *ActorRotation.ToString())
-	OwningActor->SetActorRotation(ActorRotation);
+void UDoorRotator::OpenDoor()
+{
+	GetOwner()->SetActorRotation(FRotator(0.0f, 45.0f, 0.0f));
 }
 
 
@@ -34,6 +32,9 @@ void UDoorRotator::TickComponent(float DeltaTime, ELevelTick TickType, FActorCom
 {
 	Super::TickComponent(DeltaTime, TickType, ThisTickFunction);
 
-	// ...
+	// Poll TriggerVolume0 PressurePlate
+	if (PressurePlate->IsOverlappingActor(TriggerActor))
+		OpenDoor();
+
 }
 
