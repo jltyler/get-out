@@ -30,13 +30,15 @@ public:
 
 
 private:
-	UPROPERTY(VisibleAnywhere)
+	UPROPERTY(EditAnywhere)
 		float OpenAngle = 90.f;
 	UPROPERTY(EditAnywhere)
 		ATriggerVolume * PressurePlate;
-		float LastOpened;
+		float LastOpened = 0.0f;
 	UPROPERTY(EditAnywhere)
-		float OpenTime;
+		float OpenTime = 1.0f;
 	AActor * TriggerActor;
 	AActor * Owner;
+	bool Opened = false;
+	FRotator OriginalRotation;
 };

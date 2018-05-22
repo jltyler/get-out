@@ -24,6 +24,7 @@ void UDoorRotator::BeginPlay()
 	Owner = GetOwner();
 
 	TriggerActor = GetWorld()->GetFirstPlayerController()->GetPawn();
+	OriginalRotation = Owner->GetActorRotation();
 }
 
 // Called every frame
@@ -31,11 +32,11 @@ void UDoorRotator::TickComponent(float DeltaTime, ELevelTick TickType, FActorCom
 {
 	Super::TickComponent(DeltaTime, TickType, ThisTickFunction);
 
-	// Poll TriggerVolume0 PressurePlate
+	// Poll TriggerVolume PressurePlate
 	if (PressurePlate->IsOverlappingActor(TriggerActor))
 		OpenDoor();
 
-	if (GetWorld()->GetTimeSeconds() - LastOpened > OpenTime)
+	if (Opened && GetWorld()->GetTimeSeconds() - LastOpened > OpenTime)
 		CloseDoor();
 
 
@@ -43,13 +44,15 @@ void UDoorRotator::TickComponent(float DeltaTime, ELevelTick TickType, FActorCom
 
 void UDoorRotator::OpenDoor()
 {
-	Owner->SetActorRotation(FRotator(0.0f, -170.0f, 0.0f));
+	Owner->SetActorRotation(FRotator(0.0f, OriginalRotation.Yaw + OpenAngle, 0.0f));
 	LastOpened = GetWorld()->GetTimeSeconds();
+	Opened = true;
 }
 
 
 void UDoorRotator::CloseDoor()
 {
-	Owner->SetActorRotation(FRotator(0.0f, -90.0f, 0.0f));
+	Owner->SetActorRotation(FRotator(0.0f, OriginalRotation.Yaw, 0.0f));
+	Opened = false;
 }
 
