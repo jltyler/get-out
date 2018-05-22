@@ -24,12 +24,6 @@ void UDoorRotator::BeginPlay()
 	TriggerActor = GetWorld()->GetFirstPlayerController()->GetPawn();
 }
 
-void UDoorRotator::OpenDoor()
-{
-	GetOwner()->SetActorRotation(FRotator(0.0f, 45.0f, 0.0f));
-}
-
-
 // Called every frame
 void UDoorRotator::TickComponent(float DeltaTime, ELevelTick TickType, FActorComponentTickFunction* ThisTickFunction)
 {
@@ -39,5 +33,21 @@ void UDoorRotator::TickComponent(float DeltaTime, ELevelTick TickType, FActorCom
 	if (PressurePlate->IsOverlappingActor(TriggerActor))
 		OpenDoor();
 
+	if (GetWorld()->GetTimeSeconds() - LastOpened > OpenTime)
+		CloseDoor();
+
+
+}
+
+void UDoorRotator::OpenDoor()
+{
+	GetOwner()->SetActorRotation(FRotator(0.0f, -170.0f, 0.0f));
+	LastOpened = GetWorld()->GetTimeSeconds();
+}
+
+
+void UDoorRotator::CloseDoor()
+{
+	GetOwner()->SetActorRotation(FRotator(0.0f, -90.0f, 0.0f));
 }
 
