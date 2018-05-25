@@ -3,6 +3,9 @@
 #include "Grabber.h"
 #include "GameFramework/Actor.h"
 #include "Engine/World.h"
+#include "Public/DrawDebugHelpers.h"
+#include "Components/PrimitiveComponent.h"
+#include "Components/InputComponent.h"
 
 
 // Sets default values for this component's properties
@@ -22,8 +25,21 @@ void UGrabber::BeginPlay()
 	Super::BeginPlay();
 
 	Owner = GetOwner();
-	// ...
-	
+	World = GetWorld();
+	PhysHandle = Owner->FindComponentByClass<UPhysicsHandleComponent>();
+	if (!PhysHandle) UE_LOG(LogTemp, Error, TEXT("%s.PhysHandle is NULL"), *Owner->GetName());
+
+	Input = Owner->FindComponentByClass<UInputComponent>();
+	if (Input)
+	{
+		Input->BindAction("Grab", IE_Pressed, this, &UGrabber::Grab);
+		Input->BindAction("Grab", IE_Released, this, &UGrabber::Release);
+		Input->BindAxis("View X", this, &UGrabber::Yaw);
+	}
+	else
+		UE_LOG(LogTemp, Error, TEXT("%s.Input is NULL"), *Owner->GetName());
+
+
 }
 
 
@@ -31,21 +47,35 @@ void UGrabber::BeginPlay()
 void UGrabber::TickComponent(float DeltaTime, ELevelTick TickType, FActorComponentTickFunction* ThisTickFunction)
 {
 	Super::TickComponent(DeltaTime, TickType, ThisTickFunction);
-
-	// Get player view point
-	FVector ViewLocation;
-	FRotator ViewRotation;
-	GetWorld()->GetFirstPlayerController()->GetPlayerViewPoint(ViewLocation, ViewRotation);
-	//Owner->GetActorEyesViewPoint(ViewLocation, ViewRotation);
-	UE_LOG(LogTemp, Warning, TEXT("Player ViewLocation: %s | ViewRotation: %s"), *ViewLocation.ToString(), *ViewRotation.ToString())
-	// Raycast to reach distance
-	FHitResult TraceHit;
-	FCollisionObjectQueryParams ObjectParams(ECC_PhysicsBody);
-	FVector TraceEndPoint(ViewLocation + ViewRotation.Vector() * Reach);
-	UE_LOG(LogTemp, Warning, TEXT("Trace End: %s"), *TraceEndPoint.ToString())
-	if (GetWorld()->LineTraceSingleByObjectType(TraceHit, ViewLocation, TraceEndPoint, ObjectParams))
-		UE_LOG(LogTemp, Warning, TEXT("Trace says Yay!"))
-	// If correct object is hit
-		// Grab object
 }
 
+void UGrabber::Yaw(float Diff)
+{
+	UE_LOG(LogTemp, Log, TEXT("Yaw: %f"), Diff);
+}
+
+// Release Grabbed Object
+inline void UGrabber::Release()
+{
+	PhysHandle->ReleaseComponent();
+}
+
+// Grab object
+void UGrabber::Grab()
+{
+	FVector TraceStartPoint;
+	FRotator ViewRotation;
+	GetWorld()->GetFirstPlayerController()->GetPlayerViewPoint(TraceStartPoint, ViewRotation);
+	FVector TraceEndPoint(TraceStartPoint + ViewRotation.Vector() * Reach);
+
+	FHitResult TraceHit;
+	FCollisionQueryParams QueryParams;
+	QueryParams.AddIgnoredActor(Owner);
+	bool Hit = World->LineTraceSingleByChannel(TraceHit, TraceStartPoint, TraceEndPoint, ECC_PhysicsBody, QueryParams);
+	DrawDebugLine(World, TraceStartPoint, TraceEndPoint, (Hit ? FColor(0, 220, 0) : FColor(230, 0, 0)), true, 1.0f, 0, 5.0f);
+	if (Hit)
+	{
+		PhysHandle->GrabComponent(TraceHit.GetComponent(), TraceHit.BoneName, TraceEndPoint, false);
+	}
+
+}

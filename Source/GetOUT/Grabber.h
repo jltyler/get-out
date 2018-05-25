@@ -4,6 +4,8 @@
 
 #include "CoreMinimal.h"
 #include "Components/ActorComponent.h"
+#include "PhysicsEngine/PhysicsHandleComponent.h"
+#include "Components/InputComponent.h"
 #include "Grabber.generated.h"
 
 
@@ -27,7 +29,14 @@ public:
 		
 private:
 	AActor * Owner;
+	UWorld * World;
 	UPROPERTY(EditAnywhere)
-		float Reach = 90.0f;
-	
+		float Reach = 120.0f;
+	UPhysicsHandleComponent * PhysHandle;
+	AActor * Grabbed;
+	FRotator GrabbedRotation;
+	UInputComponent * Input;
+	void Grab();
+	void Release();
+	void Yaw(float);
 };
