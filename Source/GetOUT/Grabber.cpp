@@ -47,6 +47,14 @@ void UGrabber::BeginPlay()
 void UGrabber::TickComponent(float DeltaTime, ELevelTick TickType, FActorComponentTickFunction* ThisTickFunction)
 {
 	Super::TickComponent(DeltaTime, TickType, ThisTickFunction);
+	if (PhysHandle->GetGrabbedComponent())
+	{
+		FVector TraceStartPoint;
+		FRotator ViewRotation;
+		GetWorld()->GetFirstPlayerController()->GetPlayerViewPoint(TraceStartPoint, ViewRotation);
+		FVector TraceEndPoint(TraceStartPoint + ViewRotation.Vector() * Reach);
+		PhysHandle->SetTargetLocation(TraceEndPoint);
+	}
 }
 
 void UGrabber::Yaw(float Diff)
