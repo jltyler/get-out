@@ -97,5 +97,5 @@ inline void UGrabber::Release()
 
 void UGrabber::Yaw(float Diff)
 {
-	UE_LOG(LogTemp, Log, TEXT("Yaw: %f"), Diff);
+	return;
 }

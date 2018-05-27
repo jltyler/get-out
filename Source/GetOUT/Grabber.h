@@ -23,11 +23,8 @@ protected:
 	virtual void BeginPlay() override;
 
 private:
-
 	void SetupInput();
-	
 	void SetupPhysHandle();
-
 
 public:	
 	// Called every frame
@@ -46,7 +43,6 @@ private:
 	UPROPERTY(EditAnywhere)
 		float Reach = 120.0f;
 	UPhysicsHandleComponent * PhysHandle;
-	AActor * Grabbed;
 	FRotator GrabbedRotation;
 	UInputComponent * Input;
 };
