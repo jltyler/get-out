@@ -25,6 +25,27 @@ void UDoorRotator::BeginPlay()
 
 	TriggerActor = GetWorld()->GetFirstPlayerController()->GetPawn();
 	OriginalRotation = Owner->GetActorRotation();
+	if (PressurePlate)
+	{
+		PressurePlate->OnActorBeginOverlap.AddDynamic(this, &UDoorRotator::PlateBeginOverlap);
+		PressurePlate->OnActorEndOverlap.AddDynamic(this, &UDoorRotator::PlateEndOverlap);
+	}
+	else
+		UE_LOG(LogTemp, Error, TEXT("PressurePlate is NULL!"))
+}
+
+void UDoorRotator::PlateBeginOverlap(AActor* OverlappedActor, AActor* OtherActor)
+{
+	UE_LOG(LogTemp, Warning, TEXT("PlateBeginOverlap()"))
+		//OtherActor->GetComponentByClass<UStaticMeshComponent>
+		OverlappingActors.Add(OtherActor);
+}
+
+void UDoorRotator::PlateEndOverlap(AActor* OverlappedActor, AActor* OtherActor)
+{
+	UE_LOG(LogTemp, Warning, TEXT("PlateEndOverlap()"))
+		//OtherActor->GetComponentByClass<UStaticMeshComponent>
+		OverlappingActors.Remove(OtherActor);
 }
 
 // Called every frame
@@ -38,8 +59,6 @@ void UDoorRotator::TickComponent(float DeltaTime, ELevelTick TickType, FActorCom
 
 	if (Opened && GetWorld()->GetTimeSeconds() - LastOpened > OpenTime)
 		CloseDoor();
-
-
 }
 
 void UDoorRotator::OpenDoor()
