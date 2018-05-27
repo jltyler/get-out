@@ -26,9 +26,12 @@ void UGrabber::BeginPlay()
 
 	Owner = GetOwner();
 	World = GetWorld();
-	PhysHandle = Owner->FindComponentByClass<UPhysicsHandleComponent>();
-	if (!PhysHandle) UE_LOG(LogTemp, Error, TEXT("%s.PhysHandle is NULL"), *Owner->GetName());
+	SetupPhysHandle();
+	SetupInput();
+}
 
+void UGrabber::SetupInput()
+{
 	Input = Owner->FindComponentByClass<UInputComponent>();
 	if (Input)
 	{
@@ -38,10 +41,13 @@ void UGrabber::BeginPlay()
 	}
 	else
 		UE_LOG(LogTemp, Error, TEXT("%s.Input is NULL"), *Owner->GetName());
-
-
 }
 
+void UGrabber::SetupPhysHandle()
+{
+	PhysHandle = Owner->FindComponentByClass<UPhysicsHandleComponent>();
+	if (!PhysHandle) UE_LOG(LogTemp, Error, TEXT("%s.PhysHandle is NULL"), *Owner->GetName());
+}
 
 // Called every frame
 void UGrabber::TickComponent(float DeltaTime, ELevelTick TickType, FActorComponentTickFunction* ThisTickFunction)
@@ -49,41 +55,47 @@ void UGrabber::TickComponent(float DeltaTime, ELevelTick TickType, FActorCompone
 	Super::TickComponent(DeltaTime, TickType, ThisTickFunction);
 	if (PhysHandle->GetGrabbedComponent())
 	{
-		FVector TraceStartPoint;
-		FRotator ViewRotation;
-		GetWorld()->GetFirstPlayerController()->GetPlayerViewPoint(TraceStartPoint, ViewRotation);
-		FVector TraceEndPoint(TraceStartPoint + ViewRotation.Vector() * Reach);
-		PhysHandle->SetTargetLocation(TraceEndPoint);
+		PhysHandle->SetTargetLocation(GetReachEnd());
 	}
 }
 
-void UGrabber::Yaw(float Diff)
+FVector UGrabber::GetViewLocation()
 {
-	UE_LOG(LogTemp, Log, TEXT("Yaw: %f"), Diff);
+	FRotator ViewRotation;
+	return GetViewLocationAndRotation(ViewRotation);
 }
 
-// Release Grabbed Object
+FVector UGrabber::GetViewLocationAndRotation(FRotator & out_ViewRotation)
+{
+	FVector ViewLocation;
+	World->GetFirstPlayerController()->GetPlayerViewPoint(ViewLocation, out_ViewRotation);
+	return ViewLocation;
+}
+
+FVector UGrabber::GetReachEnd()
+{
+	FRotator ViewRotation;
+	FVector ViewLocation(GetViewLocationAndRotation(ViewRotation));
+	return ViewLocation + ViewRotation.Vector() * Reach;
+}
+
+void UGrabber::Grab()
+{
+	FHitResult TraceHit;
+	FCollisionQueryParams QueryParams;
+	QueryParams.AddIgnoredActor(Owner);
+	if (World->LineTraceSingleByChannel(TraceHit, GetViewLocation(), GetReachEnd(), ECC_PhysicsBody, QueryParams))
+	{
+		PhysHandle->GrabComponent(TraceHit.GetComponent(), TraceHit.BoneName, TraceHit.Location, false);
+	}
+}
+
 inline void UGrabber::Release()
 {
 	PhysHandle->ReleaseComponent();
 }
 
-// Grab object
-void UGrabber::Grab()
+void UGrabber::Yaw(float Diff)
 {
-	FVector TraceStartPoint;
-	FRotator ViewRotation;
-	GetWorld()->GetFirstPlayerController()->GetPlayerViewPoint(TraceStartPoint, ViewRotation);
-	FVector TraceEndPoint(TraceStartPoint + ViewRotation.Vector() * Reach);
-
-	FHitResult TraceHit;
-	FCollisionQueryParams QueryParams;
-	QueryParams.AddIgnoredActor(Owner);
-	bool Hit = World->LineTraceSingleByChannel(TraceHit, TraceStartPoint, TraceEndPoint, ECC_PhysicsBody, QueryParams);
-	DrawDebugLine(World, TraceStartPoint, TraceEndPoint, (Hit ? FColor(0, 220, 0) : FColor(230, 0, 0)), true, 1.0f, 0, 5.0f);
-	if (Hit)
-	{
-		PhysHandle->GrabComponent(TraceHit.GetComponent(), TraceHit.BoneName, TraceEndPoint, false);
-	}
-
+	UE_LOG(LogTemp, Log, TEXT("Yaw: %f"), Diff);
 }

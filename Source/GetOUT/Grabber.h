@@ -22,12 +22,25 @@ protected:
 	// Called when the game starts
 	virtual void BeginPlay() override;
 
+private:
+
+	void SetupInput();
+	
+	void SetupPhysHandle();
+
+
 public:	
 	// Called every frame
 	virtual void TickComponent(float DeltaTime, ELevelTick TickType, FActorComponentTickFunction* ThisTickFunction) override;
 
-		
 private:
+	FVector GetViewLocation();
+	FVector GetViewLocationAndRotation(FRotator & out_ViewRotation);
+	FVector GetReachEnd();
+	void Grab();
+	void Release();
+	void Yaw(float);
+		
 	AActor * Owner;
 	UWorld * World;
 	UPROPERTY(EditAnywhere)
@@ -36,7 +49,4 @@ private:
 	AActor * Grabbed;
 	FRotator GrabbedRotation;
 	UInputComponent * Input;
-	void Grab();
-	void Release();
-	void Yaw(float);
 };
