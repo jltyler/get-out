@@ -3,6 +3,8 @@
 #include "DoorRotator.h"
 #include "GameFramework/Actor.h"
 #include "Engine/World.h"
+#include "Components/StaticMeshComponent.h"
+#include "Public/TimerManager.h"
 
 
 // Sets default values for this component's properties
@@ -23,7 +25,6 @@ void UDoorRotator::BeginPlay()
 
 	Owner = GetOwner();
 
-	TriggerActor = GetWorld()->GetFirstPlayerController()->GetPawn();
 	OriginalRotation = Owner->GetActorRotation();
 	if (PressurePlate)
 	{
@@ -34,44 +35,73 @@ void UDoorRotator::BeginPlay()
 		UE_LOG(LogTemp, Error, TEXT("PressurePlate is NULL!"))
 }
 
+bool UDoorRotator::AddMass(float Mass)
+{
+	CurrentMass += Mass;
+	if (CurrentMass >= MassRequired)
+	{
+		OpenDoor();
+		return true;
+	}
+	else
+	{
+		BeginCloseDoor();
+		return false;
+	}
+}
+
+float UDoorRotator::GetMassOfActor(AActor * OtherActor)
+{
+	TArray<UStaticMeshComponent *> MeshComponents;
+	OtherActor->GetComponents<UStaticMeshComponent>(MeshComponents);
+	float Mass = 0.f;
+	for (auto CurrMesh : MeshComponents)
+	{
+		Mass += CurrMesh->GetMass();
+	}
+	return Mass;
+}
+
 void UDoorRotator::PlateBeginOverlap(AActor* OverlappedActor, AActor* OtherActor)
 {
-	UE_LOG(LogTemp, Warning, TEXT("PlateBeginOverlap()"))
+	UE_LOG(LogTemp, Warning, TEXT("PlateBeginOverlap()"));
 		//OtherActor->GetComponentByClass<UStaticMeshComponent>
-		OverlappingActors.Add(OtherActor);
+	OverlappingActors.Add(OtherActor);
+	AddMass(GetMassOfActor(OtherActor));
 }
 
 void UDoorRotator::PlateEndOverlap(AActor* OverlappedActor, AActor* OtherActor)
 {
-	UE_LOG(LogTemp, Warning, TEXT("PlateEndOverlap()"))
+	UE_LOG(LogTemp, Warning, TEXT("PlateEndOverlap()"));
 		//OtherActor->GetComponentByClass<UStaticMeshComponent>
-		OverlappingActors.Remove(OtherActor);
+	OverlappingActors.Remove(OtherActor);
+	AddMass(-GetMassOfActor(OtherActor));
 }
 
 // Called every frame
 void UDoorRotator::TickComponent(float DeltaTime, ELevelTick TickType, FActorComponentTickFunction* ThisTickFunction)
 {
 	Super::TickComponent(DeltaTime, TickType, ThisTickFunction);
-
-	// Poll TriggerVolume PressurePlate
-	if (PressurePlate->IsOverlappingActor(TriggerActor))
-		OpenDoor();
-
-	if (Opened && GetWorld()->GetTimeSeconds() - LastOpened > OpenTime)
-		CloseDoor();
 }
 
 void UDoorRotator::OpenDoor()
 {
+	if (Open) return;
 	Owner->SetActorRotation(FRotator(0.0f, OriginalRotation.Yaw + OpenAngle, 0.0f));
-	LastOpened = GetWorld()->GetTimeSeconds();
-	Opened = true;
+	Open = true;
 }
 
+void UDoorRotator::BeginCloseDoor()
+{
+	if (!Open) return;
+	FTimerHandle TimerHandle;
+	GetWorld()->GetTimerManager().SetTimer(TimerHandle, this, &UDoorRotator::CloseDoor, OpenTime, false, OpenTime);
+}
 
 void UDoorRotator::CloseDoor()
 {
-	Owner->SetActorRotation(FRotator(0.0f, OriginalRotation.Yaw, 0.0f));
-	Opened = false;
+	if (!Open) return;
+	Owner->SetActorRotation(OriginalRotation);
+	Open = false;
 }
 

@@ -21,15 +21,20 @@ protected:
 	// Called when the game starts
 	virtual void BeginPlay() override;
 
+
 private:
+	bool AddMass(float Mass);
 
 	void OpenDoor();
+	void BeginCloseDoor();
 	void CloseDoor();
 
 public:	
 	// Called every frame
 	virtual void TickComponent(float DeltaTime, ELevelTick TickType, FActorComponentTickFunction* ThisTickFunction) override;
 
+	UFUNCTION()
+		float GetMassOfActor(AActor * OtherActor);
 	UFUNCTION()
 		void PlateBeginOverlap(AActor* OverlappedActor, AActor* OtherActor);
 	UFUNCTION()
@@ -46,9 +51,10 @@ private:
 		float OpenTime = 1.0f;
 	UPROPERTY(EditAnywhere)
 		float MassRequired = 200.0f;
+	float CurrentMass = 0.f;
 	AActor * TriggerActor;
 	AActor * Owner;
-	bool Opened = false;
+	bool Open = false;
 	FRotator OriginalRotation;
 	TArray<AActor *> OverlappingActors;
 };
