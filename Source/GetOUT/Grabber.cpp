@@ -53,13 +53,13 @@ void UGrabber::SetupPhysHandle()
 void UGrabber::TickComponent(float DeltaTime, ELevelTick TickType, FActorComponentTickFunction* ThisTickFunction)
 {
 	Super::TickComponent(DeltaTime, TickType, ThisTickFunction);
-	if (PhysHandle->GetGrabbedComponent())
+	if (PhysHandle && PhysHandle->GetGrabbedComponent())
 	{
 		PhysHandle->SetTargetLocation(GetReachEnd());
 	}
 }
 
-FVector UGrabber::GetViewLocation()
+inline FVector UGrabber::GetViewLocation()
 {
 	FRotator ViewRotation;
 	return GetViewLocationAndRotation(ViewRotation);
@@ -81,17 +81,19 @@ FVector UGrabber::GetReachEnd()
 
 void UGrabber::Grab()
 {
+	if (!PhysHandle) return;
 	FHitResult TraceHit;
 	FCollisionQueryParams QueryParams;
 	QueryParams.AddIgnoredActor(Owner);
 	if (World->LineTraceSingleByChannel(TraceHit, GetViewLocation(), GetReachEnd(), ECC_PhysicsBody, QueryParams))
 	{
-		PhysHandle->GrabComponent(TraceHit.GetComponent(), TraceHit.BoneName, TraceHit.Location, false);
+		PhysHandle->GrabComponent(TraceHit.GetComponent(), TraceHit.BoneName, TraceHit.Location, true);
 	}
 }
 
 inline void UGrabber::Release()
 {
+	if (!PhysHandle) return;
 	PhysHandle->ReleaseComponent();
 }
 

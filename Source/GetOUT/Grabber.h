@@ -38,11 +38,11 @@ private:
 	void Release();
 	void Yaw(float);
 		
-	AActor * Owner;
-	UWorld * World;
+	AActor * Owner = nullptr;
+	UWorld * World = nullptr;
 	UPROPERTY(EditAnywhere)
 		float Reach = 120.0f;
-	UPhysicsHandleComponent * PhysHandle;
+	UPhysicsHandleComponent * PhysHandle = nullptr;
 	FRotator GrabbedRotation;
-	UInputComponent * Input;
+	UInputComponent * Input = nullptr;
 };

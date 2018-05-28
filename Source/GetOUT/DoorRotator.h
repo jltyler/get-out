@@ -52,8 +52,8 @@ private:
 	UPROPERTY(EditAnywhere)
 		float MassRequired = 200.0f;
 	float CurrentMass = 0.f;
-	AActor * TriggerActor;
-	AActor * Owner;
+	AActor * TriggerActor = nullptr;
+	AActor * Owner = nullptr;
 	bool Open = false;
 	FRotator OriginalRotation;
 	TArray<AActor *> OverlappingActors;

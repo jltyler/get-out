@@ -32,7 +32,7 @@ void UDoorRotator::BeginPlay()
 		PressurePlate->OnActorEndOverlap.AddDynamic(this, &UDoorRotator::PlateEndOverlap);
 	}
 	else
-		UE_LOG(LogTemp, Error, TEXT("PressurePlate is NULL!"))
+		UE_LOG(LogTemp, Error, TEXT("%s.DoorRotator.PressurePlate is NULL!"), *Owner->GetName());
 }
 
 bool UDoorRotator::AddMass(float Mass)
@@ -55,7 +55,7 @@ float UDoorRotator::GetMassOfActor(AActor * OtherActor)
 	TArray<UStaticMeshComponent *> MeshComponents;
 	OtherActor->GetComponents<UStaticMeshComponent>(MeshComponents);
 	float Mass = 0.f;
-	for (auto CurrMesh : MeshComponents)
+	for (auto & CurrMesh : MeshComponents)
 	{
 		Mass += CurrMesh->GetMass();
 	}
