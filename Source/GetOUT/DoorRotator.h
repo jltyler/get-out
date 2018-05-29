@@ -42,30 +42,24 @@ public:
 	UFUNCTION()
 		void PlateEndOverlap(AActor* OverlappedActor, AActor* OtherActor);
 
-	UPROPERTY(EditAnywhere, BlueprintReadWrite)
-		float OpenAngle = 90.f;
-	UPROPERTY(EditAnywhere, BlueprintReadWrite)
-		float OpenTime = 1.0f;
 
 protected:
-	UPROPERTY(EditAnywhere, BlueprintReadOnly)
-		ATriggerVolume * PressurePlate;
-	UPROPERTY(BlueprintReadOnly)
-		float LastOpened = 0.0f;
+	UPROPERTY(EditAnywhere, BlueprintReadWrite)
+		float OpenAngle = 90.f;
 	UPROPERTY(EditAnywhere, BlueprintReadWrite)
 		float MassRequired = 200.0f;
 	UPROPERTY(BlueprintReadOnly)
 		float CurrentMass = 0.f;
 	UPROPERTY(BlueprintReadWrite)
 		FRotator OriginalRotation;
-	AActor * TriggerActor = nullptr;
-	AActor * Owner = nullptr;
+	UPROPERTY(EditAnywhere, BlueprintReadOnly)
+		ATriggerVolume * PressurePlate;
 	UPROPERTY(BlueprintReadOnly)
 		bool Open = false;
 	UPROPERTY(BlueprintReadOnly)
 		TArray<AActor *> OverlappingActors;
-	UPROPERTY(BlueprintAssignable, Category = "Test")
+	UPROPERTY(BlueprintAssignable)
 		FOnOpenDoor OnOpenDoor;
-	UPROPERTY(BlueprintAssignable, Category = "Test")
+	UPROPERTY(BlueprintAssignable)
 		FOnCloseDoor OnCloseDoor;
 };

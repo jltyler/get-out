@@ -23,16 +23,14 @@ void UDoorRotator::BeginPlay()
 {
 	Super::BeginPlay();
 
-	Owner = GetOwner();
-
-	OriginalRotation = Owner->GetActorRotation();
+	OriginalRotation = GetOwner()->GetActorRotation();
 	if (PressurePlate)
 	{
 		PressurePlate->OnActorBeginOverlap.AddDynamic(this, &UDoorRotator::PlateBeginOverlap);
 		PressurePlate->OnActorEndOverlap.AddDynamic(this, &UDoorRotator::PlateEndOverlap);
 	}
 	else
-		UE_LOG(LogTemp, Error, TEXT("%s.DoorRotator.PressurePlate is NULL!"), *Owner->GetName());
+		UE_LOG(LogTemp, Error, TEXT("%s.DoorRotator.PressurePlate is NULL!"), *GetOwner()->GetName());
 }
 
 bool UDoorRotator::AddMass(float Mass)
