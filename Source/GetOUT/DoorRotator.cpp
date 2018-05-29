@@ -39,15 +39,10 @@ bool UDoorRotator::AddMass(float Mass)
 {
 	CurrentMass += Mass;
 	if (CurrentMass >= MassRequired)
-	{
 		OpenDoor();
-		return true;
-	}
 	else
-	{
-		BeginCloseDoor();
-		return false;
-	}
+		CloseDoor();
+	return Open;
 }
 
 float UDoorRotator::GetMassOfActor(AActor * OtherActor)
@@ -64,16 +59,12 @@ float UDoorRotator::GetMassOfActor(AActor * OtherActor)
 
 void UDoorRotator::PlateBeginOverlap(AActor* OverlappedActor, AActor* OtherActor)
 {
-	UE_LOG(LogTemp, Warning, TEXT("PlateBeginOverlap()"));
-		//OtherActor->GetComponentByClass<UStaticMeshComponent>
 	OverlappingActors.Add(OtherActor);
 	AddMass(GetMassOfActor(OtherActor));
 }
 
 void UDoorRotator::PlateEndOverlap(AActor* OverlappedActor, AActor* OtherActor)
 {
-	UE_LOG(LogTemp, Warning, TEXT("PlateEndOverlap()"));
-		//OtherActor->GetComponentByClass<UStaticMeshComponent>
 	OverlappingActors.Remove(OtherActor);
 	AddMass(-GetMassOfActor(OtherActor));
 }
@@ -87,21 +78,14 @@ void UDoorRotator::TickComponent(float DeltaTime, ELevelTick TickType, FActorCom
 void UDoorRotator::OpenDoor()
 {
 	if (Open) return;
-	Owner->SetActorRotation(FRotator(0.0f, OriginalRotation.Yaw + OpenAngle, 0.0f));
+	OnOpenDoor.Broadcast();
 	Open = true;
-}
-
-void UDoorRotator::BeginCloseDoor()
-{
-	if (!Open) return;
-	FTimerHandle TimerHandle;
-	GetWorld()->GetTimerManager().SetTimer(TimerHandle, this, &UDoorRotator::CloseDoor, OpenTime, false, OpenTime);
 }
 
 void UDoorRotator::CloseDoor()
 {
 	if (!Open) return;
-	Owner->SetActorRotation(OriginalRotation);
+	OnCloseDoor.Broadcast();
 	Open = false;
 }
 

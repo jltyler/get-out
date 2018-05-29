@@ -7,6 +7,8 @@
 #include "Engine/TriggerVolume.h"
 #include "DoorRotator.generated.h"
 
+DECLARE_DYNAMIC_MULTICAST_DELEGATE(FOnOpenDoor);
+DECLARE_DYNAMIC_MULTICAST_DELEGATE(FOnCloseDoor);
 
 UCLASS( ClassGroup=(Custom), meta=(BlueprintSpawnableComponent) )
 class GETOUT_API UDoorRotator : public UActorComponent
@@ -26,12 +28,12 @@ private:
 	bool AddMass(float Mass);
 
 	void OpenDoor();
-	void BeginCloseDoor();
 	void CloseDoor();
 
 public:	
 	// Called every frame
 	virtual void TickComponent(float DeltaTime, ELevelTick TickType, FActorComponentTickFunction* ThisTickFunction) override;
+
 
 	UFUNCTION()
 		float GetMassOfActor(AActor * OtherActor);
@@ -40,21 +42,30 @@ public:
 	UFUNCTION()
 		void PlateEndOverlap(AActor* OverlappedActor, AActor* OtherActor);
 
-
-private:
-	UPROPERTY(EditAnywhere)
+	UPROPERTY(EditAnywhere, BlueprintReadWrite)
 		float OpenAngle = 90.f;
-	UPROPERTY(EditAnywhere)
-		ATriggerVolume * PressurePlate;
-		float LastOpened = 0.0f;
-	UPROPERTY(EditAnywhere)
+	UPROPERTY(EditAnywhere, BlueprintReadWrite)
 		float OpenTime = 1.0f;
-	UPROPERTY(EditAnywhere)
+
+protected:
+	UPROPERTY(EditAnywhere, BlueprintReadOnly)
+		ATriggerVolume * PressurePlate;
+	UPROPERTY(BlueprintReadOnly)
+		float LastOpened = 0.0f;
+	UPROPERTY(EditAnywhere, BlueprintReadWrite)
 		float MassRequired = 200.0f;
-	float CurrentMass = 0.f;
+	UPROPERTY(BlueprintReadOnly)
+		float CurrentMass = 0.f;
+	UPROPERTY(BlueprintReadWrite)
+		FRotator OriginalRotation;
 	AActor * TriggerActor = nullptr;
 	AActor * Owner = nullptr;
-	bool Open = false;
-	FRotator OriginalRotation;
-	TArray<AActor *> OverlappingActors;
+	UPROPERTY(BlueprintReadOnly)
+		bool Open = false;
+	UPROPERTY(BlueprintReadOnly)
+		TArray<AActor *> OverlappingActors;
+	UPROPERTY(BlueprintAssignable, Category = "Test")
+		FOnOpenDoor OnOpenDoor;
+	UPROPERTY(BlueprintAssignable, Category = "Test")
+		FOnCloseDoor OnCloseDoor;
 };
